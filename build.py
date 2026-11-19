@@ -121,8 +121,8 @@ def build_companion(arch, sdk, out_dir):
     clang = ["xcrun", "--sdk", "iphoneos", "clang", "-target", f"{arch}-apple-ios15.0",
              "-isysroot", sdk, "-dynamiclib", "-fobjc-arc", "-fblocks", "-O2",
              "-Wall", "-Wextra", "-Werror", "-I", str(ROOT / "src"),
-             "-framework", "UIKit", "-framework", "Foundation", "-framework", "CoreGraphics",
-             "-lcommonCrypto", "-undefined", "dynamic_lookup", "-Wl,-install_name,@rpath/PhoneLifecycleFix.dylib",
+             "-framework", "UIKit", "-framework", "Foundation", "-framework", "CoreGraphics", "-framework", "CommonCrypto",
+             "-undefined", "dynamic_lookup", "-Wl,-install_name,@rpath/PhoneLifecycleFix.dylib",
              str(ROOT / "src" / "PhoneLifecycleFix.m"), "-o", str(dylib)]
     run(*clang)
     run("codesign", "--force", "--sign", "-", "--timestamp=none", str(dylib))
