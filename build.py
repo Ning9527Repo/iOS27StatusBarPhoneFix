@@ -8,7 +8,7 @@ BUILD = ROOT / "build"
 VENDOR_DEB = ROOT / "vendor" / "statusbar-1.2-1.deb"
 VENDOR_DEB_SHA256 = "b0004cd4fda700e66d5f9ea7f454576c1a3da40fe08df900987efce8ee86dde6"
 ORIGINAL_DYLIB_SHA256 = "709baf93799bf42d9adb5efcc389e290f538aaf8c6d697a386d58481c8c83a77"
-VERSION = "1.2-2+phonefix1"
+VERSION = "1.2-2+phonefix2"
 COMPANION = "PhoneLifecycleFix"
 
 
@@ -71,6 +71,32 @@ def add_file(name, data, mode=0o644):
     member.mtime = 0
     member.size = len(data)
     return member, data
+
+
+def add_dir(name, mode=0o755):
+    member = tarfile.TarInfo("./" + name.rstrip("/") + "/")
+    member.type = tarfile.DIRTYPE
+    member.mode = mode
+    member.uid = member.gid = 0
+    member.uname = member.gname = "root"
+    member.mtime = 0
+    member.size = 0
+    return member, None
+
+
+def verify_directories(entries):
+    seen = set()
+    for member, data in entries:
+        name = member.name.lstrip("./").rstrip("/")
+        if not name:
+            continue
+        parent = Path(name).parent
+        while parent != Path("."):
+            assert parent.as_posix() in seen, "missing preceding directory: " + str(parent)
+            parent = parent.parent
+        if member.isdir():
+            seen.add(name)
+    return sorted(seen)
 
 
 def mkdeb(control_entries, data_entries):
@@ -153,8 +179,26 @@ def build_package(arch, sdk, original_data, original_control, companion, info):
     files[companion_name] = companion.read_bytes()
     plist = plistlib.dumps({"Filter": {"Bundles": ["com.apple.springboard"]}}, sort_keys=False)
     files[plist_name] = plist
-    data_entries = [add_file(n, d, 0o755 if n.endswith(".dylib") else 0o644)
-                    for n, d in files.items()]
+    # dpkg requires explicit directory records; tar extraction alone may hide
+    # missing parents by creating them implicitly. Preserve original modes too.
+    directories = {}
+    for member, data in original_data:
+        if member.isdir():
+            name = member.name.lstrip("./").rstrip("/")
+            directories[name] = copy.copy(member)
+        elif data is None:
+            raise AssertionError("unsupported original entry: " + member.name)
+    directories.setdefault("", add_dir("")[0])
+    for name in files:
+        parent = Path(name).parent
+        while parent != Path("."):
+            key = parent.as_posix()
+            directories.setdefault(key, add_dir(key)[0])
+            parent = parent.parent
+    data_entries = [(directories[n], None) for n in
+                    sorted(directories, key=lambda n: (len(Path(n).parts), n))]
+    data_entries += [add_file(n, d, modes.get(n, 0o755 if n.endswith(".dylib") else 0o644))
+                     for n, d in files.items()]
     installed_size = sum((len(d) + 1023) // 1024 for n, d in files.items())
     control = make_control(next(d for m, d in original_control if m.name.lstrip("./") == "control"),
                            "iphoneos-" + arch, installed_size)
@@ -168,6 +212,10 @@ def build_package(arch, sdk, original_data, original_control, companion, info):
     # Deserialize the exact archive and verify every payload, not only inputs.
     members = ar_read(package)
     got_entries = tar_read(members["data.tar.gz"])
+    verified_dirs = verify_directories(got_entries)
+    assert set(directories) - {""} == set(verified_dirs)
+    assert {m.name.lstrip("./"): m.mode for m, d in got_entries if d is not None} == {
+        n: modes.get(n, 0o755 if n.endswith(".dylib") else 0o644) for n in files}
     got = {m.name.lstrip("./"): d for m, d in got_entries if d is not None}
     assert got == files
     ctl = {m.name.lstrip("./"): d for m, d in tar_read(members["control.tar.gz"]) if d is not None}
