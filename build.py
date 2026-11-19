@@ -8,7 +8,7 @@ BUILD = ROOT / "build"
 VENDOR_DEB = ROOT / "vendor" / "statusbar-1.2-1.deb"
 VENDOR_DEB_SHA256 = "b0004cd4fda700e66d5f9ea7f454576c1a3da40fe08df900987efce8ee86dde6"
 ORIGINAL_DYLIB_SHA256 = "709baf93799bf42d9adb5efcc389e290f538aaf8c6d697a386d58481c8c83a77"
-VERSION = "1.2-2+phonefix2"
+VERSION = "1.2-2"
 COMPANION = "PhoneLifecycleFix"
 
 
@@ -129,10 +129,6 @@ def make_control(original, arch, installed_size):
             line = "Architecture: " + arch
         elif line.startswith("Version:"):
             line = "Version: " + VERSION
-        elif line.startswith("Maintainer:"):
-            line = "Maintainer: Ning&半生年华&yaowell&Benja Guo"
-        elif line.startswith("Author:"):
-            line = "Author: Ning&半生年华&yaowell&Benja Guo"
         elif line.startswith("Installed-Size:"):
             line = "Installed-Size: " + str(installed_size)
             found_size = True
