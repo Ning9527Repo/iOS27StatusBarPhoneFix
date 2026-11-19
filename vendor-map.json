@@ -1,0 +1,48 @@
+[
+  {
+    "arch": "arm64",
+    "uuid": "8fbcac4b-3611-3a34-9e6c-d82a0bbf104c",
+    "uuidBytes": "8fbcac4b36113a349e6cd82a0bbf104c",
+    "wifi": 31484,
+    "cell": 33132,
+    "dual": 30336,
+    "keys": [
+      66808,
+      66816,
+      66824,
+      66832
+    ],
+    "colorKey": 66784,
+    "textVA": 22312,
+    "textSize": 20064,
+    "textSHA256": "f67dddc0253738095a12441226c8961462a389c59804ce1e11e161cb3e31b6e5",
+    "functionPrefixes": {
+      "wifi": "ff8302d1ef3b016ded33026deb2b036de923046dfa6705a9",
+      "cell": "e923bb6df85f01a9f65702a9f44f03a9fd7b04a9fd030191",
+      "dual": "ffc302d1e923046dfc6f05a9fa6706a9f85f07a9f65708a9"
+    }
+  },
+  {
+    "arch": "arm64e",
+    "uuid": "31d23f27-1751-35af-a6ad-dacc5737e15a",
+    "uuidBytes": "31d23f27175135afa6addacc5737e15a",
+    "wifi": 31932,
+    "cell": 33596,
+    "dual": 30780,
+    "keys": [
+      66176,
+      66184,
+      66192,
+      66200
+    ],
+    "colorKey": 66152,
+    "textVA": 22524,
+    "textSize": 20488,
+    "textSHA256": "f6c2fbc3108fb9f55509e814dd4eec75623f32a1fd5f653b6297be69c136907b",
+    "functionPrefixes": {
+      "wifi": "7f2303d5ff8302d1ef3b016ded33026deb2b036de923046d",
+      "cell": "7f2303d5e923bb6df85f01a9f65702a9f44f03a9fd7b04a9",
+      "dual": "7f2303d5ffc302d1e923046dfc6f05a9fa6706a9f85f07a9"
+    }
+  }
+]

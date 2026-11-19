@@ -1,0 +1,11 @@
+Package: com.local.ios27statusbar
+Section: Tweaks
+Maintainer: Ning&半生年华&yaowell&Benja Guo
+Architecture: __ARCH__
+Version: 1.2-2+phonefix1
+Depends: mobilesubstrate
+Description: 模仿27系统状态栏 信号与Wi-Fi素材来源：Benja Guo  电池源码感谢yaowell提供；手机状态栏与控制中心持续刷新修复
+Name: iOS27状态栏
+Author: Ning&半生年华&yaowell&Benja Guo
+Icon: file:///usr/share/icons/iOS27StatusBar.png
+Installed-Size: __INSTALLED_SIZE__
