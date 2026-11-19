@@ -26,7 +26,7 @@ checks={
  'no_timer_or_restart':not any(x in src for x in ['NSTimer','CADisplayLink','dispatch_after(','kill(','system(','posix_spawn']),
  'lifecycle_entries':all('@selector('+x+')' in src for x in ['layoutSubviews','didMoveToWindow','didMoveToSuperview','setHidden:','setAlpha:','traitCollectionDidChange:']),
  'load_is_main_queue_deferred':'_dyld_register_func_for_add_image(PRImageAdded)' in src and 'dispatch_async(dispatch_get_main_queue()' in src,
- 'version_pinned':'CC_SHA256(' in src and 'memcmp(uuid->uuid,map->uuid,16)' in src,
+ 'version_pinned':'PRSHA256(' in src and 'memcmp(uuid->uuid,map->uuid,16)' in src,
  'one_hook_per_class_selector':'[gInstalled containsObject:key]' in src and '[gInstalled addObject:key]' in src,
  'parent_method_materialized':'class_addMethod(cls,sel,replacement' in src,
  'no_host_unhide':'view.hidden=' not in src and 'owner.hidden=' not in src,

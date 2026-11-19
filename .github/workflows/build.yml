@@ -21,16 +21,16 @@ jobs:
         run: |
           python3 tools/vendor_map.py
           python3 tests/check.py
-      - name: Build both package architectures
+      - name: Build arm64e RootHide package
         run: python3 build.py
       - name: Verify packages
         run: |
           python3 - <<'PY'
           import json, pathlib
           d=json.loads(pathlib.Path('dist/verification.json').read_text())
-          assert len(d['packages']) == 2
-          assert {x['architecture'] for x in d['packages']} == {'iphoneos-arm64','iphoneos-arm64e'}
-          assert all(x['companion']['subtype'] in (0,0x80000002) for x in d['packages'])
+          assert len(d['packages']) == 1
+          assert {x['architecture'] for x in d['packages']} == {'iphoneos-arm64e'}
+          assert all(x['companion']['subtype'] == 0x80000002 for x in d['packages'])
           assert all(x['original_dylib_sha256'] == '709baf93799bf42d9adb5efcc389e290f538aaf8c6d697a386d58481c8c83a77' for x in d['packages'])
           PY
       - name: Upload packages and verification

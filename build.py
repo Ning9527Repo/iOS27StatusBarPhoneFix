@@ -121,7 +121,7 @@ def build_companion(arch, sdk, out_dir):
     clang = ["xcrun", "--sdk", "iphoneos", "clang", "-target", f"{arch}-apple-ios15.0",
              "-isysroot", sdk, "-dynamiclib", "-fobjc-arc", "-fblocks", "-O2",
              "-Wall", "-Wextra", "-Werror", "-I", str(ROOT / "src"),
-             "-framework", "UIKit", "-framework", "Foundation", "-framework", "CoreGraphics", "-framework", "CommonCrypto",
+             "-framework", "UIKit", "-framework", "Foundation", "-framework", "CoreGraphics",
              "-undefined", "dynamic_lookup", "-Wl,-install_name,@rpath/PhoneLifecycleFix.dylib",
              str(ROOT / "src" / "PhoneLifecycleFix.m"), "-o", str(dylib)]
     run(*clang)
@@ -193,7 +193,7 @@ def main():
     control_entries = tar_read(control_blob)
     sdk = run("xcrun", "--sdk", "iphoneos", "--show-sdk-path").strip()
     results = []
-    for arch in ("arm64", "arm64e"):
+    for arch in ("arm64e",):
         companion, info = build_companion(arch, sdk, BUILD / ("companion-" + arch))
         _, result = build_package(arch, sdk, data_entries, control_entries, companion, info)
         results.append(result)
