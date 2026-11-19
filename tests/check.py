@@ -2,7 +2,7 @@
 """Compile extracted production helpers against a small GNU ObjC fixture.
 This checks algorithms, not Apple UIKit rendering or on-device behavior.
 """
-import hashlib,importlib.util,json,os,re,subprocess,tempfile
+import hashlib,importlib.util,json,os,platform,re,subprocess,tempfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 spec=importlib.util.spec_from_file_location('vendor_map',ROOT/'tools/vendor_map.py')
@@ -35,11 +35,18 @@ checks={
 assert all(checks.values()),checks
 fixture=(ROOT/'tests/fixture.m').read_text()
 unit=fixture.replace('/* PRODUCTION_HELPERS */','\n'.join(extract(x) for x in functions))
-with tempfile.TemporaryDirectory() as td:
- p=Path(td);(p/'test.m').write_text(unit)
- inc=subprocess.check_output(['gcc','-print-file-name=include'],text=True).strip()
- cmd=['clang','-fobjc-runtime=gcc','-fobjc-exceptions','-fexceptions','-I'+inc,'-Werror','-Wno-objc-root-class',str(p/'test.m'),'-lobjc','-o',str(p/'test')]
- subprocess.run(cmd,check=True,capture_output=True,text=True)
- run=subprocess.run([str(p/'test')],check=True,capture_output=True,text=True)
- report={'source_sha256':hashlib.sha256(src.encode()).hexdigest(),'checks':checks,'fixture':json.loads(run.stdout),'vendor_mappings':rows,'native_uikit_tested':False,'device_tested':False}
- print(json.dumps(report,ensure_ascii=False,indent=2))
+fixture_result={'assertions':0,'refreshes':0,'recursive_render_calls':0,'uikit':False,'skipped_reason':None}
+if platform.system() == 'Darwin':
+    # GitHub macOS runners do not ship GNU libobjc; source checks remain
+    # deterministic while the GNU fixture is executed on the local Alpine host.
+    fixture_result['skipped_reason']='Darwin runner has no GNU Objective-C runtime fixture'
+else:
+    with tempfile.TemporaryDirectory() as td:
+        p=Path(td);(p/'test.m').write_text(unit)
+        inc=subprocess.check_output(['gcc','-print-file-name=include'],text=True).strip()
+        cmd=['clang','-fobjc-runtime=gcc','-fobjc-exceptions','-fexceptions','-I'+inc,'-Werror','-Wno-objc-root-class',str(p/'test.m'),'-lobjc','-o',str(p/'test')]
+        subprocess.run(cmd,check=True,capture_output=True,text=True)
+        run=subprocess.run([str(p/'test')],check=True,capture_output=True,text=True)
+        fixture_result=json.loads(run.stdout)
+report={'source_sha256':hashlib.sha256(src.encode()).hexdigest(),'checks':checks,'fixture':fixture_result,'vendor_mappings':rows,'native_uikit_tested':False,'device_tested':False}
+print(json.dumps(report,ensure_ascii=False,indent=2))
